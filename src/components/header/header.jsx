@@ -17,7 +17,7 @@ const Header = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <header className={`w-[5%] ml-[1380px] flex justify-between items-center p-4 ${isDarkMode ? 'bg-[#333] text-white' : 'bg-[#f5f5f5] text-gray-800'}`}>
+      <header className={`w-[5%]  pb-[70px] ml-[1380px] flex justify-between items-center p-4 ${isDarkMode ? 'bg-[#333] text-white' : 'bg-[#f5f5f5] text-gray-800'}`}>
         <button
           onClick={toggleTheme}
           className={`flex items-center px-4 py-2 rounded ${

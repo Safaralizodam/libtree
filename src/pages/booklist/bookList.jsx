@@ -97,7 +97,7 @@ const BookList = ({ isDarkMode }) => {
   }), [isDarkMode]);
 
   return (
-    <div className="p-6">
+    <div className="p-[10px] mt-[20px]">
       <Search>
         <TextField
           variant="standard"

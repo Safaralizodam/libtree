@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import LocalGroceryStoreIcon from '@mui/icons-material/LocalGroceryStore';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { useTheme } from '../components/context/ThemeContext'; 
-import { useDispatch, useSelector } from 'react-redux';
-import { getlist } from '../reducers/booklist/bookListSlice'; 
-
+import { useTheme } from '../components/context/ThemeContext';
+import { useDispatch } from 'react-redux';
+import { logout } from '../reducers/login/loginSlice';
+import LogoutIcon from '@mui/icons-material/Logout';
 const Layout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isDarkMode } = useTheme(); 
-  const data = useSelector((store) => store.bookList.data || []);
+  const { isDarkMode } = useTheme();
   const [basketCount, setBasketCount] = useState(0);
   const [user, setUser] = useState({ username: '' });
   const [showCredentials, setShowCredentials] = useState(false);
 
-  // Effect to handle basket count updates
   useEffect(() => {
     const updateBasketCount = () => {
       const currentBasket = JSON.parse(localStorage.getItem('basketItems')) || [];
@@ -30,7 +28,6 @@ const Layout = () => {
     };
   }, []);
 
-  // Effect to fetch user and authenticate status
   useEffect(() => {
     const fetchUser = () => {
       const userData = JSON.parse(localStorage.getItem('user')) || { username: '' };
@@ -38,9 +35,8 @@ const Layout = () => {
     };
 
     fetchUser();
-  }, []);
+  }, [user.username]); // Depend on user.username to re-fetch if it changes
 
-  // Check authentication status
   const isAuthenticated = Boolean(localStorage.getItem('user'));
 
   const handleLogin = () => {
@@ -49,53 +45,69 @@ const Layout = () => {
 
   const handleLogout = () => {
     dispatch(logout());
-    localStorage.removeItem('user');
+    localStorage.removeItem('user'); // Ensure to clear user data from localStorage
     navigate('/login');
   };
 
   return (
-    <div style={{ backgroundColor: isDarkMode ? '#333' : '#f5f5f5', color: isDarkMode ? '#fff' : '#000' }}>
-      <header className="p-4 flex justify-between items-center" style={{ backgroundColor: isDarkMode ? '#333' : '#f5f5f5' }}>
-        <div className="flex items-center justify-between w-[95%] m-auto">
-          <div className="flex flex-col-reverse w-[70%]">
-            <Link to="/" className="flex items-center">
-              <img
-                src="src/assets/img/LIBTREE-removebg-preview.png" 
-                alt="Logo"
-                className="h-[70px]"
-              />
+    <div className={`min-h-screen ${isDarkMode ? 'bg-[#333] text-gray-100' : 'bg-gray-100 text-black'}`}>
+      <header className={`p-4 flex justify-between items-center ${isDarkMode ? 'bg-[#333]' : ''}`}>
+        <div className="container mx-auto flex items-center justify-between mt-[-100px]">
+          <Link to="/" className="flex items-center">
+            <img
+              src="src/assets/img/LIBTREE-removebg-preview.png"
+              alt="Logo"
+              className="h-16"
+            />
+          </Link>
+          <div className="flex items-center space-x-4">
+            {isAuthenticated ? (
+              <div className="relative flex items-center space-x-4">
+                 <Link to="/basket" className="relative flex items-center">
+              <LocalGroceryStoreIcon style={{ color: isDarkMode ? '' : '#000' }} />
+              {basketCount > 0 && (
+                <div className="absolute -top-2 -right-2 bg-green-500 text-white h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold">
+                  {basketCount}
+                </div>
+              )}
             </Link>
-          </div>
-          <div className="w-[25%] mb-[20px] m-auto text-center">
-            {!isAuthenticated ? (
-              <button className="mt-4 bg-amber-400 text-xl text-white py-4 px-7 rounded-[17px]" onClick={handleLogin}>ВОЙТИ</button>
-            ) : (
-              <div className="flex items-center">
-                <Link to="/basket">
-                  <div className="flex items-center relative">
-                    <LocalGroceryStoreIcon style={{ color: isDarkMode ? '#fff' : '#000' }} />
-                    {basketCount > 0 && (
-                      <div className="h-[15px] w-[15px] p-[10px] rounded-full bg-green-500 text-white absolute -top-4 -right-4 flex items-center justify-center">
-                        {basketCount}
-                      </div>
-                    )}
-                  </div>
-                </Link>
-                <div className="ml-4 flex items-center" onMouseEnter={() => setShowCredentials(true)} onMouseLeave={() => setShowCredentials(false)}>
-                  <img src='https://www.pngitem.com/pimgs/m/24-248235_user-profile-avatar-login-account-fa-user-circle.png' alt="User Avatar" className="h-10 w-10 rounded-full" />
+                <div 
+                  className="flex items-center cursor-pointer" 
+                  onMouseEnter={() => setShowCredentials(true)} 
+                  onMouseLeave={() => setShowCredentials(false)}
+                >
+                  <img 
+                    src='https://www.pngitem.com/pimgs/m/24-248235_user-profile-avatar-login-account-fa-user-circle.png' 
+                    alt="User Avatar" 
+                    className="h-10 w-10 rounded-full border-2 border-gray-700"
+                  />
                   {showCredentials && (
-                    <div className="ml-2">
-                      <p>{user.username}</p>
+                    <div className={`absolute p-2 rounded shadow-lg ${isDarkMode ? 'bg-[#333] text-gray-100' : 'bg-white text-black'}`}>
+                      <p>{user.username || 'No Username'}</p> {/* Ensure default text in case of an empty username */}
                     </div>
                   )}
                 </div>
-                <button className="ml-4 bg-red-500 text-white py-2 px-4 rounded" onClick={handleLogout}>Logout</button>
+                <button 
+                  className="bg-gray-800 text-white py-2 px-4 rounded hover:bg-gray-700 transition"
+                  onClick={handleLogout}
+                >
+                 <LogoutIcon/>
+                </button>
               </div>
+            ) : (
+              <button 
+                className="mt-4 bg-amber-400 text-xl text-white py-4 px-7 rounded-[17px] mr-[200px]"
+                onClick={handleLogin}
+              >
+                ВОЙТИ
+              </button>
             )}
           </div>
         </div>
       </header>
-      <Outlet />
+      <main className="flex-grow">
+        <Outlet />
+      </main>
     </div>
   );
 };
